@@ -283,17 +283,44 @@ function corregirDireccionesViento(texto){
   return texto;
 }
 
-function reemplazarAbreviaturas(texto){
-  texto=texto.replace(/\bVIS\b/gi,'visibilidad');
-  texto=texto.replace(/\bVTO\b/gi,'viento');
-  texto=texto.replace(/\bCALMA\b/gi,'Calma');
-  texto=texto.replace(/\bCENTRO\b/gi,'Centro');
-  texto=texto.replace(/\bMETEOROLOGICO\b/gi,'Meteorológico');
-  texto=texto.replace(/\bMARITIMO\b/gi,'Marítimo');
-  texto=texto.replace(/\bPUERTO\b/gi,'Puerto');
-  texto=texto.replace(/\bMONTT\b/gi,'Montt');
+function reemplazarAbreviaturas(texto) {
+  // Diccionario de reemplazos: clave = palabra original, valor = reemplazo deseado
+  const reemplazos = {
+    "VIS": "visibilidad",
+    "VTO": "viento",
+    "CALMA": "Calma",
+    "CENTRO": "Centro",
+    "METEOROLOGICO": "Meteorológico",
+    "MARITIMO": "Marítimo",
+    "PUERTO": "Puerto",
+    "MONTT": "Montt",
+    "GOLFO": "Golfo",
+    "ANCUD": "Ancud",
+    "SENO": "Seno",
+    "RELONCAVI": "Reloncaví",
+    "ISLA": "Isla",
+    "BUTA": "Buta",
+    "CHAUQUES": "Chauques",
+    "SAN": "San",
+    "PEDRO": "Pedro",
+    "BOCA": "Boca",
+    "GUAFO": "Guafo",
+    "CORONADO": "Coronado",
+
+    // Agrega más si necesitas
+  };
+
+  // Recorre cada clave y reemplaza en el texto
+  for (const [clave, valor] of Object.entries(reemplazos)) {
+    // \b asegura coincidencia de palabra completa, 'gi' ignora mayúsculas/minúsculas
+    const regex = new RegExp("\\b" + clave + "\\b", "gi");
+    texto = texto.replace(regex, valor);
+  }
+
   return texto;
 }
+
+
 
 function capitalizarTexto(str){
   return str.toLowerCase().replace(/(^|[\s])([a-záéíóúñ])/g,(m,sep,letra)=>sep+letra.toUpperCase());
