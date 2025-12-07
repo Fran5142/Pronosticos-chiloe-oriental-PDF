@@ -113,7 +113,7 @@
     flex-direction: column;
     align-items: center; /* alineado a la izquierda del contenedor */
     justify-content: center;
-    margin-top: 6px;
+    margin-top: 2px;
     padding-left: 10px; /* mueve el bloque más hacia la derecha */
 }
 
@@ -393,9 +393,10 @@ function generarVista(){
   const lineas=texto.split("\n");
 
   // MODIFICADO: Contenedor para centrar las dos primeras líneas
-  let primerasDos = `<div class="encabezado-principal-container">` +
-    lineas.slice(0, 2).map(l => `<div class="encabezado-principal">${l}</div>`).join("") +
-    `</div>`;
+let primerasDos = `<div class="encabezado-principal-container">` +
+  `<div class="encabezado-principal" style="margin-top:-30px;">${lineas[0]}</div>` +
+  `<div class="encabezado-principal">${lineas[1]}</div>` +
+  `</div>`;
 
   primerasDos += `<div style="height:18px;"></div>`;
 
@@ -450,5 +451,3 @@ function reiniciar(){
 </script>
 </body>
 </html>
-
-
