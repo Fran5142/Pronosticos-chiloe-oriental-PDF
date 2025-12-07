@@ -94,8 +94,6 @@
   font-size: 12pt;
   line-height: 1.35;
   text-align: justify;
-
-  /* 🔥 LO QUE TÚ PEDISTE: MANTENER ESPACIOS EXACTOS */
   white-space: pre-wrap;
 }
 
@@ -106,8 +104,19 @@
     text-align: center;
     text-transform: uppercase;
     color: #000;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
+
+  /* NUEVO: contenedor para centrar las dos primeras líneas */
+.encabezado-principal-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* alineado a la izquierda del contenedor */
+    justify-content: center;
+    margin-top: 40px;
+    padding-left: 90px; /* mueve el bloque más hacia la derecha */
+}
+
 
   .parrafo-libre {
     text-align: center;
@@ -284,7 +293,6 @@ function corregirDireccionesViento(texto){
 }
 
 function reemplazarAbreviaturas(texto) {
-  // Diccionario de reemplazos: clave = palabra original, valor = reemplazo deseado
   const reemplazos = {
     "VIS": "visibilidad",
     "VTO": "viento",
@@ -306,21 +314,13 @@ function reemplazarAbreviaturas(texto) {
     "BOCA": "Boca",
     "GUAFO": "Guafo",
     "CORCOVADO": "Corcovado",
-
-    // Agrega más si necesitas
   };
-
-  // Recorre cada clave y reemplaza en el texto
   for (const [clave, valor] of Object.entries(reemplazos)) {
-    // \b asegura coincidencia de palabra completa, 'gi' ignora mayúsculas/minúsculas
     const regex = new RegExp("\\b" + clave + "\\b", "gi");
     texto = texto.replace(regex, valor);
   }
-
   return texto;
 }
-
-
 
 function capitalizarTexto(str){
   return str.toLowerCase().replace(/(^|[\s])([a-záéíóúñ])/g,(m,sep,letra)=>sep+letra.toUpperCase());
@@ -364,10 +364,8 @@ function aplicarFormatoHTML(texto){
 
   html = html.replace(/(PUERTO MONTT A ISLA BUTA CHAUQUES\. \(CH 1\):)/gi,
     '<span class="negrita">$1</span>');
-
   html = html.replace(/(ISLA BUTA CHAUQUES A ISLA SAN PEDRO\. \(CH 2\):)/gi,
     '<span class="negrita">$1</span>');
-
   html = html.replace(/(BOCA DEL GUAFO Y GOLFO CORCOVADO\. \(CH 3\):)/gi,
     '<span class="negrita">$1</span>');
 
@@ -383,11 +381,6 @@ function aplicarFormatoHTML(texto){
     '</div><div class="bloque-seccion"><span class="titulo-seccion">Pronóstico:</span>');
 
   html+='</div>';
-
-  /* ❌ Quitamos la línea que destruía tus espacios */
-  // html=html.replace(/\n{2,}/g,'\n');
-
-  /* ✔ Esto convierte saltos a <br> pero conserva su cantidad */
   html=html.replace(/\n/g,'<br>');
 
   return html;
@@ -399,15 +392,26 @@ function generarVista(){
   if(!texto){alert("Por favor, pega el texto del informe meteorológico."); return;}
   const lineas=texto.split("\n");
 
-  let primerasDos = lineas.slice(0, 2)
-    .map(l => `<div class="encabezado-principal">${l}</div>`)
-    .join("");
+  // MODIFICADO: Contenedor para centrar las dos primeras líneas
+  let primerasDos = `<div class="encabezado-principal-container">` +
+    lineas.slice(0, 2).map(l => `<div class="encabezado-principal">${l}</div>`).join("") +
+    `</div>`;
 
   primerasDos += `<div style="height:18px;"></div>`;
 
-  const libres = lineas.slice(2, 5)
-    .map(l => `<div class="parrafo-libre">${l}</div>`)
-    .join("");
+const lineasLibres = lineas.slice(2, 5);
+let libres = '';
+
+// Tercera línea: centrada vertical y desplazada a la derecha
+if (lineasLibres.length > 0) {
+  libres += `<div class="parrafo-libre" style="margin-top:10px; margin-left:300px; text-align:left; font-size:12pt;">${lineasLibres[0]}</div>`;
+}
+
+// Las siguientes líneas (cuarta y quinta) quedan normales
+for (let i = 1; i < lineasLibres.length; i++) {
+  libres += `<div class="parrafo-libre">${lineasLibres[i]}</div>`;
+}
+
 
   const resto=lineas.slice(5).join("\n");
   const textoProcesado=formatearTexto(resto,listaMayus);
@@ -415,19 +419,25 @@ function generarVista(){
   document.getElementById("vistaPrevia").innerHTML=`${primerasDos}${libres}<br>${htmlFormateado}`;
 }
 
+// FUNCIÓN PDF
 async function generarPDF() {
   const { jsPDF } = window.jspdf;
   const vista = document.getElementById("vistaPrevia");
   vista.classList.add("generando-pdf");
+
   const canvas = await html2canvas(vista, { scale: 2, backgroundColor: "#ffffff" });
-  const imgData = canvas.toDataURL("image/png");
+  const imgData = canvas.toDataURL("image/jpeg", 0.7);
+
   const pdf = new jsPDF("p", "mm", "letter");
   const pageWidth = 216;
   const imgWidth = 210;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let imgHeight = (canvas.height * imgWidth) / canvas.width;
+  if (imgHeight > 280) imgHeight = 280;
+
   const nombreArchivo = document.getElementById("nombrePDF").value.trim() || "Informe_Meteorologico";
-  pdf.addImage(imgData, "PNG", (pageWidth - imgWidth) / 2, 10, imgWidth, imgHeight);
+  pdf.addImage(imgData, "JPEG", (pageWidth - imgWidth) / 2, 10, imgWidth, imgHeight);
   pdf.save(nombreArchivo + ".pdf");
+
   vista.classList.remove("generando-pdf");
 }
 
@@ -440,4 +450,3 @@ function reiniciar(){
 </script>
 </body>
 </html>
-
