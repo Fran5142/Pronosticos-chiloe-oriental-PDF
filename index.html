@@ -314,6 +314,7 @@ function reemplazarAbreviaturas(texto) {
     "BOCA": "Boca",
     "GUAFO": "Guafo",
     "CORCOVADO": "Corcovado",
+    "CICLONICA": "ciclónica",
   };
   for (const [clave, valor] of Object.entries(reemplazos)) {
     const regex = new RegExp("\\b" + clave + "\\b", "gi");
@@ -336,8 +337,22 @@ function corregirTildesContexto(texto) {
     "anticiclónico"
   );
 
+  // 3️⃣ CIRCULACIÓN al inicio de frase
+  texto = texto.replace(
+    /(^|[.!?\n]\s*)(CIRCULACION)\b/gi,
+    (m, inicio) => `${inicio}Circulación`
+  );
+
+  // 4️⃣ circulación dentro de la frase
+  texto = texto.replace(
+    /\bCIRCULACION\b/gi,
+    "circulación"
+  );
+
   return texto;
 }
+
+
 
 function capitalizarTexto(str){
   return str.toLowerCase().replace(/(^|[\s])([a-záéíóúñ])/g,(m,sep,letra)=>sep+letra.toUpperCase());
@@ -353,7 +368,6 @@ function formatearTexto(texto,listaMayus){
   });
   texto=corregirDireccionesViento(texto);
   texto=reemplazarAbreviaturas(texto);
-  texto = corregirTildesContexto(texto); // 👈 AQUÍ
 
   listaMayus.forEach(palabra=>{
     const palabraTrim=palabra.trim();
@@ -374,7 +388,20 @@ function formatearTexto(texto,listaMayus){
       return `<span class="negrita">${titulo}</span>${resto}`;
   });
 
-  return texto;
+listaMayus.forEach(palabra=>{
+  const palabraTrim=palabra.trim();
+  const regex=new RegExp("\\b"+palabraTrim+"\\b","gi");
+  if (palabraTrim.toUpperCase().startsWith("MET")) {
+    texto = texto.replace(regex, `<span class="negrita" data-met="true">${palabraTrim.toUpperCase()}</span>`);
+  } else {
+    texto = texto.replace(regex,palabraTrim.toUpperCase());
+  }
+});
+
+// 👇 SIEMPRE AL FINAL
+texto = corregirTildesContexto(texto);
+
+return texto;
 }
 
 function aplicarFormatoHTML(texto){
